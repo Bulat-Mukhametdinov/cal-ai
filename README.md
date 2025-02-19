@@ -51,4 +51,4 @@ Make sure you have the following installed:
 
 ## Helpful Links
 - [groq available models](https://console.groq.com/docs/rate-limits)
-- [langchain models usage]("https://python.langchain.com/docs/integrations/chat/")
+- [langchain models usage](https://python.langchain.com/docs/integrations/chat/)
