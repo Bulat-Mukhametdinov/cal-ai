@@ -4,7 +4,6 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 import langchain_groq
 
-load_dotenv()
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
     api_key =st.secrets['GROQ_API_KEY'],
