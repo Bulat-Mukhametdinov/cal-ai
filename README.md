@@ -1,6 +1,6 @@
 # Calculus AI Chatbot
 
-This project is a Calculus AI chatbot built using Python and LangChain. The chatbot is designed to assist users with calculus-related queries, providing explanations, solutions, and guidance.
+This project is a Calculus AI chatbot built on Python and LangChain with Streamlit frontend. The chatbot is designed to assist users with calculus-related queries, theorem provings, providing explanations, solutions, and guidance.
 
 ## Project Setup
 
@@ -31,7 +31,7 @@ Make sure you have the following installed:
      ```sh
      .\venv\Scripts\activate
      ```
-   - On macOS/Linux:
+   - On unix:
      ```sh
      source venv/bin/activate
      ```
@@ -39,7 +39,7 @@ Make sure you have the following installed:
 4. **Open the `.env` file and add your API keys**
 
     ```env
-    GROQ_API_KEY=your_openai_api_key_here
+    GROQ_API_KEY=<your_groq_api_key_here>
     ```
 
 5. **Install dependencies**
