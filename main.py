@@ -1,6 +1,5 @@
 import streamlit as st
-
-
+import re
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 import langchain_groq
@@ -14,8 +13,12 @@ model = langchain_groq.ChatGroq(
 
 def response_generator(prompt): #генерация ответов
     messages = [
-        SystemMessage("Ты эксперт в сфере математического анализа. Я задам тебе вопрос и ты на него ответишь, пользуясь стандартными теоремами и определениями"),
         HumanMessage(prompt),
+        SystemMessage("""You are an expert in calculus. User will ask you questions and you'll need to answer them, using your knowledge in math and the
+                      context, if it exists. There are some rules you MUST follow in your response:
+                      -Write ALL of your formulas on the correct latex, so streamlit.write() will show them correctly. Every latex-expression need to be framed with $.
+                      -If there is a formula in your answer, replace all the [] and () with $$.
+                      """),
     ]
 
     response = model.invoke(messages).content
@@ -34,7 +37,17 @@ def preprocess_think_tags(text): #обработка текста, чтобы б
         processed_text += '</span>'
     return processed_text
 
-
+#def llm_latex_prepocessing():#второй запрос, который вынет все формулы и заменит их на корректные.
+def render_text_with_latex(text):
+    # Находим выражения внутри квадратных скобок
+    matches = re.findall(r"\[\s*(.*?)\s*\]", text)
+    st.write(matches)
+    for match in matches:
+        cleaned_latex = match.replace("\\ ", " ")  # Убираем лишние `\`
+        text = text.replace(match, f"${cleaned_latex}$")
+    xx
+    return text
+     
 def model_answer(prompt):
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -57,19 +70,22 @@ def model_answer(prompt):
         for i in range(len(messages)):
             prompt += str(messages[i])
         ans = response_generator(prompt)
+
         ans_with_html = preprocess_think_tags(ans)
-        st.markdown(ans_with_html, unsafe_allow_html=True)
+        
+        st.write(ans_with_html, unsafe_allow_html=True)
         print(ans)
         ans = ans.split('</think>')[1]
     st.session_state.messages.append({'role':'assistant', 'content':ans})
     return ans
 
+def reset_conversation():
+  st.session_state.conversation = None
+  st.session_state.messages = None
+st.button('Reset Chat', on_click=reset_conversation)
+
+
 st.title("hei")
 
 if prompt := st.chat_input("What is up"):
     ans = model_answer(prompt)
-
-
-
-
-
