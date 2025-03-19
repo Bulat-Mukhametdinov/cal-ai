@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 import langchain_groq
@@ -8,18 +7,18 @@ import langchain_groq
 load_dotenv()
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
-    api_key =os.getenv('GROQ_API_KEY'),
+    api_key =st.secrets['GROQ_API_KEY'],
     )
 
 
 def response_generator(prompt): #генерация ответов
     messages = [
-        HumanMessage(prompt),
         SystemMessage("""You are an expert in calculus. User will ask you questions and you'll need to answer them, using your knowledge in math and the
                       context, if it exists. There are some rules you MUST follow in your response:
                       -Write ALL of your formulas on the correct latex, so streamlit.write() will show them correctly. Every latex-expression need to be framed with $.
                       -If there is a formula in your answer, replace all the [] and () with $   .
                       """),
+        HumanMessage(prompt),
     ]
 
     response = model.invoke(messages).content
