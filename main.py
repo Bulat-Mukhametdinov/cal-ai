@@ -1,14 +1,15 @@
 import streamlit as st
-import re
+import os
+from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 import langchain_groq
 
-
+load_dotenv()
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
-    api_key ='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',
-)
+    api_key =os.getenv('GROQ_API_KEY'),
+    )
 
 
 def response_generator(prompt): #генерация ответов
@@ -17,7 +18,7 @@ def response_generator(prompt): #генерация ответов
         SystemMessage("""You are an expert in calculus. User will ask you questions and you'll need to answer them, using your knowledge in math and the
                       context, if it exists. There are some rules you MUST follow in your response:
                       -Write ALL of your formulas on the correct latex, so streamlit.write() will show them correctly. Every latex-expression need to be framed with $.
-                      -If there is a formula in your answer, replace all the [] and () with $$.
+                      -If there is a formula in your answer, replace all the [] and () with $   .
                       """),
     ]
 
@@ -39,14 +40,10 @@ def preprocess_think_tags(text): #обработка текста, чтобы б
 
 #def llm_latex_prepocessing():#второй запрос, который вынет все формулы и заменит их на корректные.
 def render_text_with_latex(text):
-    # Находим выражения внутри квадратных скобок
-    matches = re.findall(r"\[\s*(.*?)\s*\]", text)
-    st.write(matches)
-    for match in matches:
-        cleaned_latex = match.replace("\\ ", " ")  # Убираем лишние `\`
-        text = text.replace(match, f"${cleaned_latex}$")
-    xx
+    for symb in ['\[', '\]', '\(', '\)']:
+        text = text.replace(symb, '$')
     return text
+
      
 def model_answer(prompt):
     if "messages" not in st.session_state:
@@ -71,7 +68,7 @@ def model_answer(prompt):
             prompt += str(messages[i])
         ans = response_generator(prompt)
 
-        ans_with_html = preprocess_think_tags(ans)
+        ans_with_html =  render_text_with_latex(preprocess_think_tags(ans))
         
         st.write(ans_with_html, unsafe_allow_html=True)
         print(ans)
@@ -89,3 +86,8 @@ st.title("hei")
 
 if prompt := st.chat_input("What is up"):
     ans = model_answer(prompt)
+
+
+
+
+
