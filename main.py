@@ -56,6 +56,7 @@ if st.sidebar.button("Add Chat"):
         save_chats()  # Save updated chat history to file
     else:
         st.sidebar.warning("Chat name already exists!")
+    print(st.session_state.chats['Chat 1'])
 # Add a divider between sections
 st.sidebar.markdown("---")
 
