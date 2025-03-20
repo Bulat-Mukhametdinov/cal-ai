@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import time
 from langchain import PromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -70,10 +71,9 @@ def question_generator(model, text):
 #генерация ответов
 def response_generator(model,prompt): 
     messages = [
-        SystemMessage("""You are an expert in calculus. User will ask you questions and you'll need to answer them, using your knowledge in math and the
-                      context, if it exists. There are some rules you MUST follow in your response:
-                      -Write ALL of your formulas on the correct latex, so streamlit.write() will show them correctly. Every latex-expression need to be framed with $.
-                      -If there is a formula in your answer, replace all the [] and () with $   .
+        SystemMessage("""Вы являетесь экспертом в математическом анализе. Пользователь будет задавать вам вопросы, и вы должны будете отвечать на них, используя свои знания в математике и контекст, если он существует. Есть несколько правил, которым вы ОБЯЗАНЫ следовать в своих ответах:
+Записывайте ВСЕ свои формулы в правильном формате LaTeX, чтобы streamlit.write() отображал их корректно. Каждое выражение LaTeX должно быть заключено в знаки $.
+Если в вашем ответе присутствует формула, замените все [] и () на $.
                       """),
         HumanMessage(prompt),
     ]
@@ -127,30 +127,34 @@ def preprocess_think_tags(text):
         processed_text += '</span>'
     return processed_text
 
+#заменяем скобки для латеха
 def render_text_with_latex(text):
     for symb in ['\[', '\]', '\(', '\)']:
         text = text.replace(symb, '$')
     return text
 
-def model_answer(model, prompt):
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.write(message['content'])
-
+#делаем пословный вывод
+def write_with_delay(text):
     
+    for word in text.split():
+        yield st.write(word, unsafe_allow_html=True)
+        time.sleep(0.05)
+    return text
+
+#фулл ответ модельки
+def model_answer(model, prompt):
+    
+    current_chat_history = st.session_state.chats[st.session_state.current_chat]
     with st.chat_message("user"):
         st.write(prompt)
     query = question_generator(model, prompt)
     print(query)
-    st.session_state.messages.append({'role':'user', 'content': query})
+    current_chat_history.append({'role':'user', 'content': prompt})
 
     with st.chat_message('assistant'):
         messages=[
                 {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
+                for m in current_chat_history
         ]
         prompt = ''
         for i in range(len(messages)):
@@ -161,10 +165,9 @@ def model_answer(model, prompt):
         ans = ans.split('</think>')[-1]
         message_to_voice = replace_formulas(model, ans)
         ans_for_history = render_text_with_latex(ans).split('</think>')[-1]
-    st.session_state.messages.append({'role':'assistant', 'content':ans_for_history})
+        
+    current_chat_history.append({'role':'assistant', 'content':ans_for_history})
     return (ans, message_to_voice)
 
-# def reset_conversation():
-#   st.session_state.conversation = None
-#   st.session_state.messages = None
+
 
