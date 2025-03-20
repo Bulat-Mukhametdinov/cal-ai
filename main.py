@@ -23,7 +23,7 @@ if "user_id" not in cookies:
     USER_ID = user_id
 else:
     USER_ID = cookies["user_id"]
-CHAT_HISTORY_FILE = f"chat_history_{USER_ID}.json"
+CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chat_history_{USER_ID}.json")
 
 # Step 3: Load chat history from file on startup
 # Load chat history from file on startup
