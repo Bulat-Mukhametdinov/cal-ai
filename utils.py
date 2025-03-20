@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from langchain import PromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
+from sound import *
 
 
 #делаем из промпта юзера запрос для векторной базы
@@ -132,7 +133,8 @@ def render_text_with_latex(text):
         text = text.replace(symb, '$')
     return text
 
-def model_answer(model, prompt):
+
+def model_answer(model, prompt, is_voice_input=False):
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -140,28 +142,31 @@ def model_answer(model, prompt):
         with st.chat_message(message["role"]):
             st.write(message['content'])
 
-    
     with st.chat_message("user"):
         st.write(prompt)
     query = question_generator(model, prompt)
     print(query)
-    st.session_state.messages.append({'role':'user', 'content': query})
+    st.session_state.messages.append({'role': 'user', 'content': query})
 
     with st.chat_message('assistant'):
-        messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
+        messages = [
+            {"role": m["role"], "content": m["content"]}
+            for m in st.session_state.messages
         ]
         prompt = ''
         for i in range(len(messages)):
             prompt += str(messages[i])
         ans = response_generator(model, prompt)
-        ans_with_html =  render_text_with_latex(preprocess_think_tags(ans))
+        ans_with_html = render_text_with_latex(preprocess_think_tags(ans))
         st.write(ans_with_html, unsafe_allow_html=True)
         ans = ans.split('</think>')[-1]
         message_to_voice = replace_formulas(model, ans)
         ans_for_history = render_text_with_latex(ans).split('</think>')[-1]
-    st.session_state.messages.append({'role':'assistant', 'content':ans_for_history})
+        if is_voice_input:
+            audio_file = "output.mp3"
+            tts_to_file(message_to_voice, audio_file)  # Озвучка только ответа
+            auto_play_audio(audio_file)  # Автовоспроизведение аудио
+    st.session_state.messages.append({'role': 'assistant', 'content': ans_for_history})
     return (ans, message_to_voice)
 
 # def reset_conversation():

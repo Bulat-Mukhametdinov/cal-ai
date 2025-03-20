@@ -5,6 +5,16 @@ __pycache__/
 venv/
 .env
 
+# Ignore streamlit
+.streamlit/
+.toml
+
+.devcontainer/
+
+#Ignore sounds
+*.wav
+*.mp3
+
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
