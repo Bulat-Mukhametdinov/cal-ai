@@ -1,3 +1,4 @@
 langchain
 langchain[groq]
 streamlit 
+extra-streamlit-components
