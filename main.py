@@ -33,7 +33,6 @@ cookies = {}
 cookies = cookie_manager.get_all()
 
         
-st.write(cookies)
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
     api_key =st.secrets['GROQ_API_KEY'],
