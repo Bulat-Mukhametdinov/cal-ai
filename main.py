@@ -1,15 +1,15 @@
 import time
 import streamlit as st
-from extra_streamlit_components import CookieManager 
+from streamlit_cookies_controller import CookieController
 import langchain_groq
 import json
 from utils import *
-time.sleep(2)
-cookie_manager = CookieManager()
+
+controller = CookieController()
 
 cookies = {}
 
-cookies = cookie_manager.get_all()
+cookies = cookies = controller.getAll()
 
         
 model = langchain_groq.ChatGroq(
