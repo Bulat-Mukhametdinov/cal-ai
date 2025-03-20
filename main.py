@@ -5,6 +5,14 @@ import json
 from utils import *
 cookie_manager = CookieManager()
 
+cookies = {}
+while not cookies or "user_id" not in cookies:
+    cookies = cookie_manager.get_all()
+    if not cookies or "user_id" not in cookies:
+        st.warning("Cookies are being loaded. Please wait...")
+        # Simulate a small delay to avoid busy-waiting
+        time.sleep(0.5)
+
 cookies = cookie_manager.get_all()
 st.write(cookies)
 model = langchain_groq.ChatGroq(
