@@ -49,6 +49,7 @@ st.sidebar.title("Chat Sessions")
 new_chat_name = st.sidebar.text_input("Enter chat name (optional)", placeholder="New chat name")
 if st.sidebar.button("Add Chat"):
     chat_name = new_chat_name.strip() or f"Chat {len(st.session_state.chats) + 1}"
+    print(st.session_state.chats)
     if chat_name not in st.session_state.chats:
         st.session_state.chats[chat_name] = []  # Initialize new chat history
         st.session_state.current_chat = chat_name  # Switch to the new chat
