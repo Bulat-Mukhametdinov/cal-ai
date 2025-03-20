@@ -1,7 +1,7 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 import streamlit as st
 from pinecone import Pinecone
-import os
+
 
 model_name = "sergeyzh/BERTA"
 model = HuggingFaceEmbeddings(model_name = model_name)
@@ -21,7 +21,6 @@ except Exception as e:
     index = None
 
 
-
 def context(query_text):
 
     if not pc:
@@ -35,12 +34,7 @@ def context(query_text):
     found_text = []
     for match in results['matches']:
         text = match['metadata'].get('text', '')
-        score = match.get('score', 0)
-        if score >= 0:
-            found_text.append({"text": text, "score": score})
+        found_text.append(text)
 
 
     return found_text
-
-
-print(context("теорема Вейштрасса"))
