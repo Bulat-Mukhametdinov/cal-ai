@@ -56,7 +56,7 @@ if st.sidebar.button("Add Chat"):
         save_chats()  # Save updated chat history to file
     else:
         st.sidebar.warning("Chat name already exists!")
-    print(st.session_state.chats['Chat 1'])
+    
 # Add a divider between sections
 st.sidebar.markdown("---")
 
@@ -81,6 +81,7 @@ if st.sidebar.button("Delete Current Chat"):
 st.title("AI Chat App")
 
 if st.session_state.current_chat:
+    print(st.session_state.chats['Chat 1'])
     st.subheader(f"Chat: {st.session_state.current_chat}")
 
 
