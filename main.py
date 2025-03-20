@@ -7,14 +7,13 @@ import speech_recognition as sr
 import pyttsx3
 from audio_recorder_streamlit import audio_recorder
 from langchain import PromptTemplate
-
+import base64
 
 # Инициализация модели
 model = langchain_groq.ChatGroq(
-    model_name = 'deepseek-r1-distill-llama-70b',
-    api_key = st.secrets['GROQ_API_KEY'],
-    )
-
+    model_name='deepseek-r1-distill-llama-70b',
+    api_key=st.secrets['GROQ_API_KEY'],
+)
 
 def response_generator(prompt):  # Генерация ответов
     messages = [
@@ -28,7 +27,6 @@ def response_generator(prompt):  # Генерация ответов
 
     response = model.invoke(messages).content
     return response
-
 
 def preprocess_think_tags(text):  # Обработка текста, чтобы были разные цвета у размышлений и ответа
     if '</think>' in text:
@@ -69,8 +67,6 @@ def recognize_speech(wav_file_path, language="ru-RU"):
         print(f"Ошибка сервиса распознавания речи: {e}")
         return None
 
-
-
 def tts_to_file(text, file_path="output.mp3"):  # Преобразование текста в аудио и сохранение в файл
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
@@ -79,15 +75,11 @@ def tts_to_file(text, file_path="output.mp3"):  # Преобразование �
     engine.save_to_file(text, file_path)
     engine.runAndWait()
 
-
-def model_answer(prompt):
+def model_answer(prompt, is_voice_input=False):
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message['content'])
-
+    # Добавляем запрос пользователя в историю
     st.session_state.messages.append({'role': 'user', 'content': prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -111,15 +103,16 @@ def model_answer(prompt):
         # Сохраняем ответ для последующего использования
         st.session_state.messages.append({'role': 'assistant', 'content': ans})
 
-        # Если озвучка включена, воспроизводим только ответ
-        if st.session_state.play_audio:
+        # Если запрос был через микрофон, озвучиваем ответ
+        if is_voice_input:
             audio_file = "output.mp3"
-            tts_to_file(replace_formulas(model,answer_only), audio_file)  # Озвучка только ответа
-            st.audio(audio_file, format="audio/mp3")
+            tts_to_file(replace_formulas(model, answer_only), audio_file)  # Озвучка только ответа
+            auto_play_audio(audio_file)  # Автовоспроизведение аудио
 
     return ans
 
 
+# убираем все формулы(для программы Димона)
 def replace_formulas(model, text):
     prompt_templ = """Ты — помощник по переводу математических формул в текст, который можно легко зачитать или озвучить. Твоя задача — преобразовать любое математическое выражение в простой текст, используя только буквы, цифры, пробелы и знаки препинания. Вот правила, которые нужно соблюдать:
 
@@ -144,55 +137,41 @@ def replace_formulas(model, text):
 
     Выведи полностью следующе сообщение с заменнеными формулами и ничего больше, НИЧЕГО:
     {message}"""
-    prompt = PromptTemplate.from_template(prompt_templ).partial(message=text)
-
+    prompt = PromptTemplate(input_variables=['message'], template=prompt_templ)
     messages = prompt.format(
-        message=text)
+        message=text
+    )
     response = model.invoke(messages).content
-    return response
+    return response.split('</think>')[-1]
 
+def auto_play_audio(audio_file):
+    with open(audio_file, "rb") as audio_file:
+        audio_bytes = audio_file.read()
+    base64_audio = base64.b64encode(audio_bytes).decode("utf-8")
+    audio_html = f'<audio src="data:audio/mp3;base64,{base64_audio}" controls autoplay>'
+    st.markdown(audio_html, unsafe_allow_html=True)
 
 # Сброс диалога
 def reset_conversation():
     st.session_state.conversation = None
     st.session_state.messages = []
 
-
 # Интерфейс Streamlit
-st.title("CalAI")
+st.title("Hei")
 
-
-# Кнопка для включения/выключения озвучки
-if "play_audio" not in st.session_state:
-    st.session_state.play_audio = False
-
-# Кнопка для включения/выключения озвучки
-if "play_audio" not in st.session_state:
-    st.session_state.play_audio = False
-
-# Создание placeholder для кнопки
-button_placeholder = st.empty()
-
-# Текст кнопки зависит от состояния озвучки
-button_text = "Озвучка выключена 🔇" if not st.session_state.play_audio else "Озвучка включена 🔊"
-
-# Отображение кнопки
-if button_placeholder.button(button_text, key="play_audio_button"):
-    # Переключение состояния озвучки
-    st.session_state.play_audio = not st.session_state.play_audio
-
-    # Обновление текста кнопки
-    button_placeholder.empty()  # Очищаем placeholder
-    button_text = "Озвучка выключена 🔇" if not st.session_state.play_audio else "Озвучка включена 🔊"
-    button_placeholder.button(button_text, key="updated_play_audio_button")
+# Отображение истории сообщений
+if "messages" in st.session_state:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message['content'])
 
 # Создание колонок для текстового ввода и кнопки записи
 col1, col2 = st.columns([4, 1])  # Пропорция 4:1 для текстового ввода и кнопки записи
 
-with col1:
-    # Поле для текстового ввода
-    if prompt := st.chat_input("Введите ваш запрос"):
-        model_answer(prompt)
+# Поле для текстового ввода
+
+if prompt := st.chat_input("Введите ваш запрос"):
+    model_answer(prompt, is_voice_input=False)  # Без озвучки для текстового ввода
 
 with col2:
     # Кнопка записи
@@ -204,7 +183,7 @@ with col2:
         voice_prompt = recognize_speech("audio_file.wav")
         if voice_prompt:
             with col1:
-                model_answer(voice_prompt)
+                model_answer(voice_prompt, is_voice_input=True)  # Озвучка для голосового ввода
 
 # Кнопка для сброса чата
 st.button('Reset Chat', on_click=reset_conversation)
