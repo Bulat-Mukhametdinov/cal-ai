@@ -101,30 +101,30 @@ def write_with_delay(text):
         time.sleep(0.05)
     return text
 
-#фулл ответ модельки
-def model_answer(model, prompt):
+# #фулл ответ модельки
+# def model_answer(model, prompt):
     
-    current_chat_history = st.session_state.chats[st.session_state.current_chat]
-    with st.chat_message("user"):
-        st.write(prompt)
-    query = question_generator(model, prompt)
-    print(query)
-    current_chat_history.append({'role':'user', 'content': prompt})
+#     current_chat_history = st.session_state.chats[st.session_state.current_chat]
+#     with st.chat_message("user"):
+#         st.write(prompt)
+#     query = question_generator(model, prompt)
+#     print(query)
+#     current_chat_history.append({'role':'user', 'content': prompt})
 
-    with st.chat_message('assistant'):
-        messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in current_chat_history
-        ]
-        prompt = ''
-        for i in range(len(messages)):
-            prompt += str(messages[i])
-        ans = response_generator(model, prompt)
-        ans_with_html =  render_text_with_latex(preprocess_think_tags(ans))
-        st.write(ans_with_html, unsafe_allow_html=True)
-        ans = ans.split('</think>')[-1]
-        message_to_voice = replace_formulas(model, ans)
-        ans_for_history = render_text_with_latex(ans).split('</think>')[-1]
+#     with st.chat_message('assistant'):
+#         messages=[
+#                 {"role": m["role"], "content": m["content"]}
+#                 for m in current_chat_history
+#         ]
+#         prompt = ''
+#         for i in range(len(messages)):
+#             prompt += str(messages[i])
+#         ans = response_generator(model, prompt)
+#         ans_with_html =  render_text_with_latex(preprocess_think_tags(ans))
+#         st.write(ans_with_html, unsafe_allow_html=True)
+#         ans = ans.split('</think>')[-1]
+#         message_to_voice = replace_formulas(model, ans)
+#         ans_for_history = render_text_with_latex(ans).split('</think>')[-1]
         
-    current_chat_history.append({'role':'assistant', 'content':ans_for_history})
-    return (ans, message_to_voice)
+#     current_chat_history.append({'role':'assistant', 'content':ans_for_history})
+#     return (ans, message_to_voice)

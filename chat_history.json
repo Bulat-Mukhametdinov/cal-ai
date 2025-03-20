@@ -1,27 +1,4 @@
 {
-    "Chat #]L[oXA[B": [
-        {
-            "content": "what is tailor series",
-            "additional_kwargs": {},
-            "response_metadata": {},
-            "type": "human",
-            "name": null,
-            "id": null,
-            "example": false
-        },
-        {
-            "content": "A Taylor series is a mathematical representation of a function as an infinite sum of terms that are expressed in terms of the values of the function's derivatives at a single point. The Taylor series of a function f(x) around a point a is given by:\n\n$$f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!}(x-a)^n$$\n\nwhere $f^{(n)}(a)$ is the nth derivative of f evaluated at x=a.\n\nThe Taylor series is a powerful tool for approximating functions and is widely used in many fields, including physics, engineering, and economics.\n\nIs there something specific you would like to know about Taylor series?",
-            "additional_kwargs": {},
-            "response_metadata": {},
-            "type": "ai",
-            "name": null,
-            "id": null,
-            "example": false,
-            "tool_calls": [],
-            "invalid_tool_calls": [],
-            "usage_metadata": null
-        }
-    ],
     "Chat #hm3r3zbg": [
         {
             "content": "what is tailor series",
