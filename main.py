@@ -10,7 +10,7 @@ controller = CookieController()
 cookies = {}
 
 cookies = controller.getAll()
-st.write(cookies)
+
         
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
