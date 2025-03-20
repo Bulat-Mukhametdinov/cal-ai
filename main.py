@@ -81,7 +81,7 @@ if st.sidebar.button("Delete Current Chat"):
 st.title("AI Chat App")
 
 if st.session_state.current_chat:
-    print(st.session_state.chats['Chat 1'])
+    print(st.session_state.chats)
     st.subheader(f"Chat: {st.session_state.current_chat}")
 
 
