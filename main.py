@@ -70,7 +70,7 @@ for chat_name in st.session_state.chats.keys():
 # Add another divider before delete button
 st.sidebar.markdown("---")
 
-Section 3: Delete Current Chat
+#Section 3: Delete Current Chat
 if st.sidebar.button("Delete Current Chat"):
     if st.session_state.current_chat:
         del st.session_state.chats[st.session_state.current_chat]
@@ -78,7 +78,7 @@ if st.sidebar.button("Delete Current Chat"):
         save_chats()
         st.rerun()
 
-Step 5: Main chat interface
+#Step 5: Main chat interface
 st.title("AI Chat App")
 
 if st.session_state.current_chat:
