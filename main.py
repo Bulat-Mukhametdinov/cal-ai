@@ -18,11 +18,12 @@ if "current_chat" not in st.session_state:
     st.session_state.current_chat = None
 
 if "user_id" not in cookies:
-    user_id = str(os.urandom(8).hex())  # Generate a unique user ID
+    USER_ID = str(os.urandom(8).hex())  # Generate a unique user ID
     cookie_manager.set("user_id", user_id)  # Save the user ID in cookies
-    USER_ID = user_id
 else:
     USER_ID = cookies["user_id"]
+
+st.write(f"Ваш уникальный ID: {USER_ID}")
 CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chat_history_{USER_ID}.json")
 
 # Step 3: Load chat history from file on startup
@@ -69,15 +70,15 @@ for chat_name in st.session_state.chats.keys():
 # Add another divider before delete button
 st.sidebar.markdown("---")
 
-# Section 3: Delete Current Chat
-# if st.sidebar.button("Delete Current Chat"):
-#     if st.session_state.current_chat:
-#         del st.session_state.chats[st.session_state.current_chat]
-#         st.session_state.current_chat = None
-#         save_chats()
-#         st.rerun()
+Section 3: Delete Current Chat
+if st.sidebar.button("Delete Current Chat"):
+    if st.session_state.current_chat:
+        del st.session_state.chats[st.session_state.current_chat]
+        st.session_state.current_chat = None
+        save_chats()
+        st.rerun()
 
-# Step 5: Main chat interface
+Step 5: Main chat interface
 st.title("AI Chat App")
 
 if st.session_state.current_chat:
