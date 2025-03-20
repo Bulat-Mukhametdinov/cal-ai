@@ -4,10 +4,11 @@ from extra_streamlit_components import CookieManager
 import langchain_groq
 import json
 from utils import *
+time.sleep(2)
 cookie_manager = CookieManager()
 
 cookies = {}
-time.sleep(2)
+
 cookies = cookie_manager.get_all()
 
         
