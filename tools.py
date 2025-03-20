@@ -1,7 +1,7 @@
 import streamlit as st
 from rag import context
 from langchain.tools import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 class GetContext(BaseModel):
     query_text: str = Field(description="Text for searching in retrieval data base.")

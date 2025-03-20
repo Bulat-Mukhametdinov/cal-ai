@@ -1,85 +1,45 @@
 import streamlit as st
+import random
 import os
+import json
 import time
 from langchain import PromptTemplate
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+
+# Save chat history to file
+def save_chats(chats_save_dest):
+    chat_history = st.session_state.chats
+    chat_history_json = json.dumps({chat_name: [chat.model_dump() for chat in chat_history[chat_name]] for chat_name in chat_history}, indent=4)
+    # Save to a file
+    with open("chat_history.json", "w") as f:
+        f.write(chat_history_json)
+
+# Load chat history from file on startup
+def load_chats(chats_load_src):
+    try:
+        with open("chat_history.json", "r") as f:
+            chats_data = json.load(f)
+    except:
+        return {}
+
+    # Convert dictionaries back to message objects
+    message_type_mapping = {
+        "human": HumanMessage,
+        "ai": AIMessage,
+        "system": SystemMessage
+    }
+    chats = {}
+    for chat_name in chats_data:
+        chats[chat_name] = [message_type_mapping[msg["type"]](content=msg["content"]) for msg in chats_data[chat_name]]
+
+    return chats
 
 
-#делаем из промпта юзера запрос для векторной базы
-def question_generator(model, text):
-    prompt_templ = """Ты — помощник по переформулировке вопросов и решений, связанных с математическим анализом, для работы с учебником. Твоя задача — преобразовать ввод пользователя в строгую, формальную формулировку, которая максимально соответствует стилю учебника по математическому анализу. Переформулировка должна быть оптимизирована для RAG-системы, работающей с этим учебником.
+def generate_chat_name():
+    symbols = [chr(i) for i in list(range(48, 58)) + list(range(97, 123))]
+    name = f"Chat #{''.join(random.choices(symbols, k=8))}"
+    return name
 
-При переформулировке следуй этим правилам:
-
-1. Используй строгий математический язык :
-Все формулировки должны быть формальными, без разговорных оборотов.
-Используй стандартные термины и обозначения из учебника (например, "предел последовательности", "непрерывность функции", "теорема Коши").
-2. Устраняй двусмысленность :
-Если ввод пользователя содержит неясные или неточные формулировки, переформулируй их так, чтобы они стали однозначными.
-Убедись, что все переменные, функции и условия четко указаны.
-3. Структурируй запрос :
-Разделяй сложные вопросы или решения на логические части.
-Если пользователь предоставляет доказательство или решение, выдели основные этапы рассуждений в виде отдельных шагов.
-4. Определи цель запроса :
-Если пользователь запрашивает проверку решения или доказательства, переформулируй запрос как проверку корректности выполненных шагов.
-Если пользователь задает вопрос, переформулируй его как задачу или утверждение, требующее объяснения.
-5. Сохраняй семантику :
-Переформулировка должна точно передавать исходный смысл вопроса или решения, не добавляя новых интерпретаций.
-6. Формат выхода :
-Вывод должен быть кратким, формальным и готовым для векторизации.
-Используй стиль учебника: определения, теоремы, задачи и примеры должны быть представлены в строгой форме.
-
-Примеры работы:
-
-Вход:
-"Я пытался доказать, что если функция непрерывна на отрезке [a, b], то она достигает своего максимума и минимума. Вот мои шаги: сначала я взял произвольную точку c ∈ [a, b], потом показал, что значения f(x) ограничены, и нашел точку, где значение максимальное. Правильно ли я сделал?"
-Выход:
-"Проверить корректность доказательства теоремы Вейерштрасса о достижении непрерывной функцией своих экстремумов на отрезке [a, b]:
-Функция f(x) непрерывна на отрезке [a, b].
-Доказывается ограниченность значений f(x) на [a, b].
-Доказывается существование точки c ∈ [a, b], где f(c) = max f(x)."
-
-Вход:
-"Как найти предел lim (x → 0) (1 - cos(x)) / x^2?"
-Выход:
-"Вычислить предел lim (x → 0) ((1 - cos(x)) / x^2)."
-
-Вход:
-"Я решаю задачу на нахождение площади под графиком y = ln(x) на отрезке [1, e]. Сначала я записал интеграл ∫[1, e] ln(x) dx, потом применил интегрирование по частям, но застрял. Как дальше?"
-Выход:
-"Решить задачу нахождения площади под графиком функции y = ln(x) на отрезке [1, e]:
-Задан интеграл ∫[1, e] ln(x) dx.
-Применено интегрирование по частям.
-Требуется завершение вычисления интеграла."
-
-Вход:
-"Что такое производная функции f(x) в точке x = a?"
-Выход:
-"Определение производной функции f(x) в точке x = a:
-Производная функции f(x) в точке x = a определяется как lim (h → 0) (f(a + h) - f(a)) / h, если этот предел существует."
-
-Вот мой запрос, который необходимо переформулировать:
-{query}
-"""
-    prompt = PromptTemplate(input_variables=['query'], template = prompt_templ)
-    messages = prompt.format(
-        query=text
-    )
-    response = model.invoke(messages).content
-    return response.split('</think>')[-1]
-
-#генерация ответов
-def response_generator(model,prompt): 
-    messages = [
-        SystemMessage("""Вы являетесь экспертом в математическом анализе. Пользователь будет задавать вам вопросы, и вы должны будете отвечать на них, используя свои знания в математике и контекст, если он существует. Есть несколько правил, которым вы ОБЯЗАНЫ следовать в своих ответах:
-Записывайте ВСЕ свои формулы в правильном формате LaTeX, чтобы streamlit.write() отображал их корректно. Каждое выражение LaTeX должно быть заключено в знаки $.
-Если в вашем ответе присутствует формула, замените все [] и () на $.
-                      """),
-        HumanMessage(prompt),
-    ]
-
-    response = model.invoke(messages).content
-    return response
 
 #убираем все формулы(для программы Димона)
 def replace_formulas(model, text):
@@ -168,23 +128,3 @@ def model_answer(model, prompt):
         
     current_chat_history.append({'role':'assistant', 'content':ans_for_history})
     return (ans, message_to_voice)
-
-
-
-from streamlit import runtime
-from streamlit.runtime.scriptrunner import get_script_run_ctx
-
-
-def get_remote_ip() -> str:
-    """Get remote ip."""
-
-    try:
-        ctx = get_script_run_ctx()
-        if ctx is None:
-            return None
-
-        session_info = runtime.get_instance().get_client(ctx.session_id)
-        if session_info is None:
-            return None
-    except Exception as e:
-        return None

@@ -2,48 +2,33 @@ import streamlit as st
 import langchain_groq
 import json
 from utils import *
+from llm import llm
+from agents import AgentAnswerPipeline
+import random
+import torch
 
-model = langchain_groq.ChatGroq(
-    model_name = 'deepseek-r1-distill-llama-70b',
-    api_key =st.secrets['GROQ_API_KEY'],
-    )
-
-if "chats" not in st.session_state:
-    st.session_state.chats = {}  # Dictionary to store chat histories
-if "current_chat" not in st.session_state:
-    st.session_state.current_chat = None
-
+torch.classes.__path__ = [] # add this line to manually set it to empty.
+agent = AgentAnswerPipeline()
 CHAT_HISTORY_FILE = "chats_data.json"
 
-# Step 3: Load chat history from file on startup
-def load_chats():
-    if os.path.exists(CHAT_HISTORY_FILE):
-        with open(CHAT_HISTORY_FILE, "r", encoding="utf-8") as file:
-            try:
-                return json.load(file)
-            except json.JSONDecodeError:
-                return {}
-    return {}
 
-st.session_state.chats = load_chats()
-
-# Step 4: Save chat history to file
-def save_chats():
-    with open(CHAT_HISTORY_FILE, "w", encoding="utf-8") as file:
-        json.dump(st.session_state.chats, file, ensure_ascii=False, indent=4)
+if "chats" not in st.session_state:
+    st.session_state.chats = load_chats(CHAT_HISTORY_FILE)
+if "current_chat" not in st.session_state:
+    st.session_state.current_chat = None
 
 st.sidebar.title("Chat Sessions")
 
 # Section 1: Create New Chat
-st.sidebar.subheader("Create New Chat")
-new_chat_name = st.sidebar.text_input("Enter chat name", placeholder="New chat name")
-if st.sidebar.button("Add Chat") and new_chat_name.strip():
-    if new_chat_name not in st.session_state.chats:
-        st.session_state.chats[new_chat_name] = []  # Initialize new chat history
-        st.session_state.current_chat = new_chat_name  # Switch to the new chat
-        save_chats()
-    else:
-        st.sidebar.warning("Chat name already exists!")
+if st.sidebar.button("Create New Chat"):
+    new_chat_name = ''
+    flag = True
+    while flag or new_chat_name in st.session_state.chats:
+        new_chat_name = generate_chat_name()
+        flag = False
+    
+    st.session_state.chats[new_chat_name] = []  # Initialize new chat history
+    st.session_state.current_chat = new_chat_name  # Switch to the new chat
 
 # Add a divider between sections
 st.sidebar.markdown("---")
@@ -53,6 +38,7 @@ st.sidebar.subheader("Your Chats")
 for chat_name in st.session_state.chats.keys():
     if st.sidebar.button(chat_name, key=f"chat_button_{chat_name}"):
         st.session_state.current_chat = chat_name  # Switch to the selected chat
+        agent.init_chat_history(st.session_state.chats[chat_name])
 
 # Add another divider before delete button
 st.sidebar.markdown("---")
@@ -73,13 +59,21 @@ if st.session_state.current_chat:
 
 
     # Display chat history
+    print(st.session_state.chats)
+    print(st.session_state.current_chat)
     for message in st.session_state.chats[st.session_state.current_chat]:
-        with st.chat_message(message["role"]):
+        message = message.model_dump()
+        with st.chat_message(message["type"]):
             st.write(message['content'])
 
     if prompt := st.chat_input("What is up"):
-        ans = model_answer(model, prompt)
-        save_chats()
-
-st.markdown(f"The remote ip is {get_remote_ip()}")
-print(f"The remote ip is {get_remote_ip()}")
+        with st.chat_message("user"):
+            st.write(prompt)
+        
+        ans = agent(prompt)
+        
+        with st.chat_message('assistant'):
+            st.write(ans)
+        
+        st.session_state.chats[st.session_state.current_chat] = agent.get_chat()
+        save_chats(CHAT_HISTORY_FILE)
