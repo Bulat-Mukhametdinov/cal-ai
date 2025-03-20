@@ -21,11 +21,12 @@ if "chats" not in st.session_state:
     st.session_state.chats = {}  # Dictionary to store chat histories
 if "current_chat" not in st.session_state:
     st.session_state.current_chat = None
-
-# if "user_id" not in cookies:
-#     USER_ID = str(os.urandom(8).hex())  # Generate a unique user ID
-#     cookie_manager.set("user_id", USER_ID)  # Save the user ID in cookies
-# else:
+time.sleep(2)
+if "user_id" not in cookies:
+    
+    USER_ID = str(os.urandom(8).hex())  # Generate a unique user ID
+    cookie_manager.set("user_id", USER_ID)  # Save the user ID in cookies
+else:
 USER_ID = cookies["user_id"]
 
 st.write(f"Ваш уникальный ID: {USER_ID}")
