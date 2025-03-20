@@ -24,10 +24,7 @@ st.components.v1.html("""
 if "cookies_ready" not in st.session_state:
     st.session_state.cookies_ready = False
 
-if not st.session_state.cookies_ready:
-    st.warning("Waiting for cookies to load...")
-else:
-    st.write("Cookies are ready!")
+
 cookies = {}
 
 cookies = cookie_manager.get_all()
