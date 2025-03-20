@@ -19,7 +19,7 @@ if "current_chat" not in st.session_state:
 
 if "user_id" not in cookies:
     USER_ID = str(os.urandom(8).hex())  # Generate a unique user ID
-    cookie_manager.set("user_id", user_id)  # Save the user ID in cookies
+    cookie_manager.set("user_id", USER_ID)  # Save the user ID in cookies
 else:
     USER_ID = cookies["user_id"]
 
