@@ -4,14 +4,34 @@ import langchain_groq
 import json
 from utils import *
 cookie_manager = CookieManager()
+st.components.v1.html("""
+<script>
+    function waitForCookies() {
+        const cookies = document.cookie;
+        if (!cookies.includes("user_id=")) {
+            setTimeout(waitForCookies, 500); // Retry after 500ms
+        } else {
+            // Notify Streamlit that cookies are ready
+            const event = new Event("cookiesReady");
+            window.dispatchEvent(event);
+        }
+    }
+    waitForCookies();
+</script>
+""", height=0)
 
+# Wait for cookies to be ready
+if "cookies_ready" not in st.session_state:
+    st.session_state.cookies_ready = False
+
+if not st.session_state.cookies_ready:
+    st.warning("Waiting for cookies to load...")
+else:
+    st.write("Cookies are ready!")
 cookies = {}
-while not cookies or "user_id" not in cookies:
-    cookies = cookie_manager.get_all()
-    if not cookies or "user_id" not in cookies:
-        st.warning("Cookies are being loaded. Please wait...")
-        # Simulate a small delay to avoid busy-waiting
-        time.sleep(0.5)
+
+cookies = cookie_manager.get_all()
+
         
 st.write(cookies)
 model = langchain_groq.ChatGroq(
