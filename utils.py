@@ -3,8 +3,7 @@ import os
 import time
 from langchain import PromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
-from streamlit import runtime
-from streamlit.runtime.scriptrunner import get_script_run_ctx
+
 
 #делаем из промпта юзера запрос для векторной базы
 def question_generator(model, text):
@@ -172,6 +171,10 @@ def model_answer(model, prompt):
 
 
 
+from streamlit import runtime
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+
 def get_remote_ip() -> str:
     """Get remote ip."""
 
@@ -185,6 +188,3 @@ def get_remote_ip() -> str:
             return None
     except Exception as e:
         return None
-
-    return session_info.request.remote_ip
-

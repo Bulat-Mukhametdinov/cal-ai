@@ -1,11 +1,7 @@
 import streamlit as st
-from extra_streamlit_components import CookieManager 
 import langchain_groq
 import json
 from utils import *
-cookie_manager = CookieManager()
-
-cookies = cookie_manager.get_all()
 
 model = langchain_groq.ChatGroq(
     model_name = 'deepseek-r1-distill-llama-70b',
@@ -17,16 +13,9 @@ if "chats" not in st.session_state:
 if "current_chat" not in st.session_state:
     st.session_state.current_chat = None
 
-if "user_id" not in cookies:
-    user_id = str(os.urandom(8).hex())  # Generate a unique user ID
-    cookie_manager.set("user_id", user_id)  # Save the user ID in cookies
-    USER_ID = user_id
-else:
-    USER_ID = cookies["user_id"]
-CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chat_history_{USER_ID}.json")
+CHAT_HISTORY_FILE = "chats_data.json"
 
 # Step 3: Load chat history from file on startup
-# Load chat history from file on startup
 def load_chats():
     if os.path.exists(CHAT_HISTORY_FILE):
         with open(CHAT_HISTORY_FILE, "r", encoding="utf-8") as file:
@@ -46,15 +35,16 @@ def save_chats():
 st.sidebar.title("Chat Sessions")
 
 # Section 1: Create New Chat
-new_chat_name = st.sidebar.text_input("Enter chat name (optional)", placeholder="New chat name")
-if st.sidebar.button("Add Chat"):
-    chat_name = new_chat_name.strip() or f"Chat {len(st.session_state.chats) + 1}"
-    if chat_name not in st.session_state.chats:
-        st.session_state.chats[chat_name] = []  # Initialize new chat history
-        st.session_state.current_chat = chat_name  # Switch to the new chat
-        save_chats()  # Save updated chat history to file
+st.sidebar.subheader("Create New Chat")
+new_chat_name = st.sidebar.text_input("Enter chat name", placeholder="New chat name")
+if st.sidebar.button("Add Chat") and new_chat_name.strip():
+    if new_chat_name not in st.session_state.chats:
+        st.session_state.chats[new_chat_name] = []  # Initialize new chat history
+        st.session_state.current_chat = new_chat_name  # Switch to the new chat
+        save_chats()
     else:
         st.sidebar.warning("Chat name already exists!")
+
 # Add a divider between sections
 st.sidebar.markdown("---")
 
@@ -81,7 +71,7 @@ st.title("AI Chat App")
 if st.session_state.current_chat:
     st.subheader(f"Chat: {st.session_state.current_chat}")
 
-    current_chat_history = st.session_state.chats[st.session_state.current_chat]
+
     # Display chat history
     for message in st.session_state.chats[st.session_state.current_chat]:
         with st.chat_message(message["role"]):
@@ -91,3 +81,5 @@ if st.session_state.current_chat:
         ans = model_answer(model, prompt)
         save_chats()
 
+st.markdown(f"The remote ip is {get_remote_ip()}")
+print(f"The remote ip is {get_remote_ip()}")
