@@ -4,29 +4,9 @@ import langchain_groq
 import json
 from utils import *
 cookie_manager = CookieManager()
-st.components.v1.html("""
-<script>
-    function waitForCookies() {
-        const cookies = document.cookie;
-        if (!cookies.includes("user_id=")) {
-            setTimeout(waitForCookies, 500); // Retry after 500ms
-        } else {
-            // Notify Streamlit that cookies are ready
-            const event = new Event("cookiesReady");
-            window.dispatchEvent(event);
-        }
-    }
-    waitForCookies();
-</script>
-""", height=0)
-
-# Wait for cookies to be ready
-if "cookies_ready" not in st.session_state:
-    st.session_state.cookies_ready = False
-
 
 cookies = {}
-
+time.sleep(2)
 cookies = cookie_manager.get_all()
 
         
