@@ -23,7 +23,7 @@ if "user_id" not in cookies:
     USER_ID = user_id
 else:
     USER_ID = cookies["user_id"]
-CHAT_HISTORY_FILE = f"chat_history_{USER_ID}.json"
+CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chat_history_{USER_ID}.json")
 
 # Step 3: Load chat history from file on startup
 # Load chat history from file on startup
@@ -81,7 +81,7 @@ st.title("AI Chat App")
 if st.session_state.current_chat:
     st.subheader(f"Chat: {st.session_state.current_chat}")
 
-
+    current_chat_history = st.session_state.chats[st.session_state.current_chat]
     # Display chat history
     for message in st.session_state.chats[st.session_state.current_chat]:
         with st.chat_message(message["role"]):
