@@ -70,12 +70,12 @@ for chat_name in st.session_state.chats.keys():
 st.sidebar.markdown("---")
 
 # Section 3: Delete Current Chat
-if st.sidebar.button("Delete Current Chat"):
-    if st.session_state.current_chat:
-        del st.session_state.chats[st.session_state.current_chat]
-        st.session_state.current_chat = None
-        save_chats()
-        st.rerun()
+# if st.sidebar.button("Delete Current Chat"):
+#     if st.session_state.current_chat:
+#         del st.session_state.chats[st.session_state.current_chat]
+#         st.session_state.current_chat = None
+#         save_chats()
+#         st.rerun()
 
 # Step 5: Main chat interface
 st.title("AI Chat App")
