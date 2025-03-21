@@ -1,3 +1,8 @@
-langchain
+﻿langchain
 langchain[groq]
-streamlit 
+langchain[huggingface]
+streamlit
+pinecone
+streamlit_cookies_controller
+wolframalpha
+langchain_community

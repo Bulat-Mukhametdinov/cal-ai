@@ -10,3 +10,7 @@ venv/
 
 # Ignore VS Code settings
 .vscode/
+
+# Ignore streamlit folder
+.streamlit/
+

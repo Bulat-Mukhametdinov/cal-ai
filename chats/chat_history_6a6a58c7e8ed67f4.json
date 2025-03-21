@@ -1,0 +1,88 @@
+{
+    "Chat #796d8d633f7a": [
+        {
+            "content": "what is my name",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+        },
+        {
+            "content": "I'm sorry, but I don't have any information about your name. I'm a calculus assistant, and I don't have access to personal information about users. I'm here to help with calculus-related questions and topics!",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        },
+        {
+            "content": "my name is bulat",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+        },
+        {
+            "content": "Nice to meet you, Bulat! I'm happy to assist you with any calculus-related questions or topics you'd like to discuss. What's on your mind today?",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        },
+        {
+            "content": "say my name",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+        },
+        {
+            "content": "Nice to meet you again, Bulat!",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        },
+        {
+            "content": "write a tailor series formual",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": null,
+            "example": false
+        },
+        {
+            "content": "The Taylor series formula is given by: $f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!}(x-a)^n$, where $f^{(n)}(a)$ is the $n$th derivative of $f$ evaluated at $a$, and $a$ is the center of the Taylor series.",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "ai",
+            "name": null,
+            "id": null,
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": null
+        }
+    ]
+}

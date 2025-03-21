@@ -1,21 +1,44 @@
-from langchain_community.vectorstores import FAISS
-import os
 from langchain_huggingface import HuggingFaceEmbeddings
+import streamlit as st
+from pinecone import Pinecone
 
 
-model = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-small")
-
-db = os.path.join(os.curdir, "db") 
-
-if not os.path.exists(db):
-    raise FileNotFoundError(f"The directory {db} does not exist. Please check the path.")
-
-vector_store = FAISS.load_local(db, model, allow_dangerous_deserialization=True)
+model_name = "sergeyzh/BERTA"
+model = HuggingFaceEmbeddings(model_name = model_name)
 
 
-def context(query):
+try:
+    pc = Pinecone(
+        api_key= st.secrets['PINECONE_API_KEY']
+    )
+except Exception as e:
+    print("Eror on Pinecone initialization")
+    print(e)
+    pc = None
 
-    retriever = vector_store.similarity_search(query, k=5)
+index_name = "berta-index"
+try:
+    index = pc.Index(index_name) if pc else None
+except Exception as e:
+    print("Error on index initialization")
+    print(e)
+    index = None
 
-    results = [doc.page_content for doc in retriever]
-    return results
+
+def context(query_text):
+
+    if not pc:
+        raise RuntimeError(f"Pinecone doesn't exist")
+    if not index:
+        raise RuntimeError(f"Index doesn't exist")
+            
+    query_vector = model.embed_query(query_text)
+
+    results = index.query(vector=query_vector, top_k=3, include_metadata=True)
+    found_text = []
+    for match in results['matches']:
+        text = match['metadata'].get('text', '')
+        found_text.append(text)
+
+
+    return found_text
