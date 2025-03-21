@@ -14,7 +14,7 @@ class GetContext(BaseModel):
 
 @tool(args_schema=GetContext)
 def get_context(query_text: str) -> str:
-    """Return context data from calculus textbook"""
+    """This tool provides data based on the given query text. It will return three large fragments from calculus textbooks. The input should be a term, the name of a theory, or the name of a formula."""
     answer_list = context(query_text)
     return "\n".join(answer_list)
 
@@ -26,7 +26,7 @@ def get_context(query_text: str) -> str:
 prompt = """You are best at checking proof correctness
 Check this proof
 {proof}
-Return your short opinion on this proof"""
+Return your short **(1-3 sentence)** opinion on this proof"""
 
 
 class ProofCheck(BaseModel):
@@ -35,7 +35,7 @@ class ProofCheck(BaseModel):
 
 @tool(args_schema=ProofCheck)
 def proof_check(proof: str) -> str:
-    """Returns the correctness of proof"""
+    """Useful when you need to check correctness of provided proof. Input should be user's proof that you need to check"""
     try:
         correctness = llm_proof.invoke(prompt.format(proof = proof)).content.split('</think>')[-1]
         return correctness
