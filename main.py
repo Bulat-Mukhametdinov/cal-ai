@@ -5,8 +5,7 @@ from utils import *
 from agents import AgentAnswerPipeline
 from streamlit_cookies_controller import CookieController
 import torch
-from dotenv import load_dotenv
-
+import os
 
 ### INITIALIZATIONS BEGIN ###
 torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
@@ -14,11 +13,12 @@ torch.classes.__path__ = [] # dirty fix - add this line to manually set it to em
 # langsmith tracing integration
 langsmith_env = ["LANGCHAIN_TRACING_V2", "LANGCHAIN_ENDPOINT", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"]
 if all([param in st.secrets for param in langsmith_env]):
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
-    os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-    os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
-    os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
-    print(f"LangSmith tracing enabled: {langsmith.utils.tracing_is_enabled()}")
+    if os.environ.get("LANGCHAIN_API_KEY") is None:
+        os.environ["LANGCHAIN_TRACING_V2"] = "true"
+        os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+        os.environ["LANGCHAIN_API_KEY"] = st.secrets["LANGCHAIN_API_KEY"]
+        os.environ["LANGCHAIN_PROJECT"] = st.secrets["LANGCHAIN_PROJECT"]
+        os.write(1, f"LangSmith tracing enabled: {langsmith.utils.tracing_is_enabled()}\n".encode("ASCII"))
 else:
     print("LangSmith environment parameters not found.")
 
