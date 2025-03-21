@@ -12,12 +12,16 @@ try:
         api_key= st.secrets['PINECONE_API_KEY']
     )
 except Exception as e:
+    print("Eror on Pinecone initialization")
+    print(e)
     pc = None
 
 index_name = "berta-index"
 try:
     index = pc.Index(index_name) if pc else None
 except Exception as e:
+    print("Error on index initialization")
+    print(e)
     index = None
 
 
