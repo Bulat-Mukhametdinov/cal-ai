@@ -1,16 +1,24 @@
+import langsmith
+import langsmith
 import streamlit as st
-import langchain_groq
-import json
 from utils import *
-from llm import llm
 from agents import AgentAnswerPipeline
 from streamlit_cookies_controller import CookieController
-import random
 import torch
+from dotenv import load_dotenv
+
 
 ### INITIALIZATIONS BEGIN ###
-
 torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
+
+# langsmith tracing integration
+langsmith_env = ["LANGCHAIN_TRACING", "LANGCHAIN_ENDPOINT", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"]
+if all([param in st.secrets for param in langsmith_env]):
+    load_dotenv(dotenv_path=".streamlit/secrets.toml", override=True)
+    print(f"LangSmith tracing enabled: {langsmith.utils.tracing_is_enabled()}")
+else:
+    print("LangSmith environment parameters not found.")
+
 agent = AgentAnswerPipeline() # ReAct based agent for answering
 
 controller = CookieController()
