@@ -14,7 +14,10 @@ torch.classes.__path__ = [] # dirty fix - add this line to manually set it to em
 # langsmith tracing integration
 langsmith_env = ["LANGCHAIN_TRACING_V2", "LANGCHAIN_ENDPOINT", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"]
 if all([param in st.secrets for param in langsmith_env]):
-    load_dotenv(dotenv_path=".streamlit/secrets.toml", override=True)
+    with open(".env", 'a+') as file:
+        for param in langsmith_env:
+            file.write(f"{param} = '{st.secrets[param]}'\n")
+    load_dotenv(override=True)
     print(f"LangSmith tracing enabled: {langsmith.utils.tracing_is_enabled()}")
 else:
     print("LangSmith environment parameters not found.")
