@@ -3,9 +3,10 @@ from rag import context
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 from llm import llm_proof
+from langchain.agents import load_tools
+
 
 ### RAG search Tool begin ###
-
 
 class GetContext(BaseModel):
     query_text: str = Field(description="Text for searching in retrieval data base.")
@@ -21,7 +22,6 @@ def get_context(query_text: str) -> str:
 
 
 ### Proof Check Tool begin ###
-
 
 prompt = """You are best at checking proof correctness
 Check this proof
@@ -49,4 +49,5 @@ def proof_check(proof: str) -> str:
 tools = [
     get_context,
     proof_check,
+    load_tools(["wolfram-alpha"], wolfram_alpha_appid=st.secrets['WOLFRAM_ALPHA_APPID'])[0],
 ]
