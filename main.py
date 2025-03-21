@@ -4,13 +4,31 @@ import json
 from utils import *
 from llm import llm
 from agents import AgentAnswerPipeline
+from streamlit_cookies_controller import CookieController
 import random
 import torch
 
-torch.classes.__path__ = [] # add this line to manually set it to empty.
-agent = AgentAnswerPipeline()
-CHAT_HISTORY_FILE = "chats_data.json"
+torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
+agent = AgentAnswerPipeline() # ReAct based agent for answering
 
+controller = CookieController()
+cookies = {}
+cookies = controller.getAll()
+
+# If cookies was not already loaded
+if "user_id" not in cookies:
+    print('waiting for cookies..')
+    time.sleep(2)
+    cookies = controller.getAll()
+
+if "user_id" not in cookies:
+    USER_ID = str(os.urandom(8).hex())  # Generate a unique user ID
+    controller.set("user_id", USER_ID)  # Save the user ID in cookies
+else:
+    USER_ID = cookies["user_id"]
+
+st.write(f"Your unique identifier: {USER_ID}")
+CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chats/chat_history_{USER_ID}.json")
 
 if "chats" not in st.session_state:
     st.session_state.chats = load_chats(CHAT_HISTORY_FILE)
@@ -19,7 +37,7 @@ if "current_chat" not in st.session_state:
 
 st.sidebar.title("Chat Sessions")
 
-# Section 1: Create New Chat
+# Create New Chat
 if st.sidebar.button("Create New Chat"):
     new_chat_name = ''
     flag = True
@@ -48,7 +66,7 @@ if st.sidebar.button("Delete Current Chat"):
     if st.session_state.current_chat:
         del st.session_state.chats[st.session_state.current_chat]
         st.session_state.current_chat = None
-        save_chats()
+        save_chats(CHAT_HISTORY_FILE)
         st.rerun()
 
 # Step 5: Main chat interface

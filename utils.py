@@ -11,13 +11,13 @@ def save_chats(chats_save_dest):
     chat_history = st.session_state.chats
     chat_history_json = json.dumps({chat_name: [chat.model_dump() for chat in chat_history[chat_name]] for chat_name in chat_history}, indent=4)
     # Save to a file
-    with open("chat_history.json", "w") as f:
+    with open(chats_save_dest, "w") as f:
         f.write(chat_history_json)
 
 # Load chat history from file on startup
 def load_chats(chats_load_src):
     try:
-        with open("chat_history.json", "r") as f:
+        with open(chats_load_src, "r") as f:
             chats_data = json.load(f)
     except:
         return {}
@@ -36,8 +36,7 @@ def load_chats(chats_load_src):
 
 
 def generate_chat_name():
-    symbols = [chr(i) for i in list(range(48, 58)) + list(range(97, 123))]
-    name = f"Chat #{''.join(random.choices(symbols, k=8))}"
+    name = f"Chat #{str(os.urandom(6).hex())}"
     return name
 
 
