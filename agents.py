@@ -41,7 +41,7 @@ class AgentAnswerPipeline():
         return response["output"]
 
     def init_chat_history(self, history:list) -> None:
-        self.chat_history = [self.first_system_prompt, history]
+        self.chat_history = [self.first_system_prompt] + history
     
     def get_chat(self):
         return self.chat_history[1:]
