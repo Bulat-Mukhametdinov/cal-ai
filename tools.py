@@ -3,7 +3,8 @@ from rag import context
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 from llm import llm_proof
-from langchain.agents import load_tools
+import agents
+from langchain_community.agent_toolkits.load_tools import load_tools
 
 
 ### RAG search Tool begin ###
@@ -29,13 +30,14 @@ Check this proof
 Return your short **(1-3 sentence)** opinion on this proof"""
 
 
-class ProofCheck(BaseModel):
-    proof: str = Field(description="Proof that needs to be checked.")
+# class ProofCheck(BaseModel):
+#     proof: str = Field(description="Proof that needs to be checked.")
 
 
-@tool(args_schema=ProofCheck)
-def proof_check(proof: str) -> str:
-    """Useful when you need to check correctness of provided proof. Input should be user's proof that you need to check"""
+@tool()
+def proof_check() -> str:
+    """Useful when you need to check correctness of provided proof."""
+    proof = agents.input_message
     try:
         correctness = llm_proof.invoke(prompt.format(proof = proof)).content.split('</think>')[-1]
         return correctness

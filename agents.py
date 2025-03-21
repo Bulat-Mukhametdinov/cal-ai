@@ -7,6 +7,7 @@ from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
+input_message = None
 
 class AgentAnswerPipeline():
     # Initialize translation prompt
@@ -38,7 +39,7 @@ class AgentAnswerPipeline():
         agent=agent, tools=tools, handle_parsing_errors=True,
     )
 
-    first_system_prompt = SystemMessage(content="You are helpful calculus assistant. Use latex format for all your formulas.")
+    first_system_prompt = SystemMessage(content="You are helpful calculus assistant. Use latex format for all your formulas. **Final answer should be the same language as the user's input**.")
 
     def __init__(self, debug=True):
         """set debug=True if you want to show agent's thoughts in console output"""
@@ -48,10 +49,14 @@ class AgentAnswerPipeline():
     
 
     def __call__(self, query):
+        global input_message
+        input_message = query
+
         response = self.agent_executor.invoke(
             {"input": query, "chat_history": self.chat_history})
 
-        response = self.translate.invoke({"input": query, "answer": response["output"]})
+        response = response["output"]
+        # response = self.translate.invoke({"input": query, "answer": response["output"]})
         
         # Update history
         self.chat_history.append(HumanMessage(content=query))
