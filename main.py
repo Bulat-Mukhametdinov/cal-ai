@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
 
 # langsmith tracing integration
-langsmith_env = ["LANGCHAIN_TRACING", "LANGCHAIN_ENDPOINT", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"]
+langsmith_env = ["LANGCHAIN_TRACING_V2", "LANGCHAIN_ENDPOINT", "LANGCHAIN_API_KEY", "LANGCHAIN_PROJECT"]
 if all([param in st.secrets for param in langsmith_env]):
     load_dotenv(dotenv_path=".streamlit/secrets.toml", override=True)
     print(f"LangSmith tracing enabled: {langsmith.utils.tracing_is_enabled()}")
