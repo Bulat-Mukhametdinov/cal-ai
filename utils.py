@@ -35,10 +35,23 @@ def load_chats(chats_load_src):
     return chats
 
 
-def generate_chat_name():
-    name = f"Chat #{str(os.urandom(6).hex())}"
-    return name
-
+def generate_chat_name(context = None, model=None):
+    if not context:
+        name = f"Chat #{str(os.urandom(6).hex())}"
+    else:
+        prompt_template = """Create a short description of two-three words to the main theme of following context. In your answer write only this couple of words and nothing more. Here is the context:
+        {text}.
+        If chat name that you want to create is in that list: {names_list}. Then create another one with the same meaning.
+        """
+        prompt = PromptTemplate(input_variables=['text', 'names_list'], template=prompt_template)
+        messages = prompt.format(text=context, names_list = ', '.join(st.session_state.chats.keys()))
+        name = model.invoke(messages).content
+    final_name = name
+    i = 1
+    while final_name in st.session_state.chats:
+        final_name = f"{name} {i}"
+        i += 1
+    return final_name
 
 #убираем все формулы(для программы Димона)
 def replace_formulas(model, text):
