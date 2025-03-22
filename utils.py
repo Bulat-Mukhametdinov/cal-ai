@@ -99,6 +99,7 @@ def replace_formulas(model, text):
 #         processed_text += '</span>'
 #     return processed_text
 
+
 #заменяем скобки для латеха
 def render_text_with_latex(text):
     for symb in ['\[', '\]', '\(', '\)']:
@@ -115,7 +116,6 @@ def write_with_delay(text):
 
 # #фулл ответ модельки
 # def model_answer(model, prompt):
-    
 #     current_chat_history = st.session_state.chats[st.session_state.current_chat]
 #     with st.chat_message("user"):
 #         st.write(prompt)

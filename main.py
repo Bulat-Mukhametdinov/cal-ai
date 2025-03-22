@@ -3,6 +3,9 @@ from streamlit_float import *
 from sound import *
 import streamlit as st
 import langsmith
+import langsmith
+import langsmith
+import streamlit as st
 from utils import *
 from agents import AgentAnswerPipeline
 from streamlit_cookies_controller import CookieController
@@ -42,7 +45,6 @@ if "user_id" not in cookies:
     controller.set("user_id", USER_ID)  # Save the user ID in cookies
 else:
     USER_ID = cookies["user_id"]
-
 
 st.write(f'<span style="color: gray; opacity: 0.5;">Yor unique identifier is "{USER_ID}"</span>', unsafe_allow_html=True)
 CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chats/chat_history_{USER_ID}.json")
