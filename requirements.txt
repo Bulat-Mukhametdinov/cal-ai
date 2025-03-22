@@ -1,4 +1,4 @@
-﻿langchain
+langchain
 langchain[groq]
 langchain[huggingface]
 streamlit
