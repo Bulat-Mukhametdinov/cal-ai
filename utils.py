@@ -35,42 +35,55 @@ def load_chats(chats_load_src):
     return chats
 
 
-def generate_chat_name():
-    name = f"Chat #{str(os.urandom(6).hex())}"
-    return name
+def generate_chat_name(context = None, model=None):
+    if not context:
+        name = f"Chat #{str(os.urandom(6).hex())}"
+    else:
+        prompt_template = """Create a short description of two-three words to the main theme of following context. In your answer write only this couple of words and nothing more. Here is the context:
+        {text}.
+        If chat name that you want to create is in that list: {names_list}. Then create another one with the same meaning.
+        """
+        prompt = PromptTemplate(input_variables=['text', 'names_list'], template=prompt_template)
+        messages = prompt.format(text=context, names_list = ', '.join(st.session_state.chats.keys()))
+        name = model.invoke(messages).content
+    final_name = name
+    i = 1
+    while final_name in st.session_state.chats:
+        final_name = f"{name} {i}"
+        i += 1
+    return final_name
 
+#убираем все формулы(для программы Димона)
+def replace_formulas(model, text):
+    prompt_templ = """Ты — помощник по переводу математических формул в текст, который можно легко зачитать или озвучить. Твоя задача — преобразовать любое математическое выражение в простой текст, используя только буквы, цифры, пробелы и знаки препинания. Вот правила, которые нужно соблюдать:
 
-# #убираем все формулы(для программы Димона)
-# def replace_formulas(model, text):
-#     prompt_templ = """Ты — помощник по переводу математических формул в текст, который можно легко зачитать или озвучить. Твоя задача — преобразовать любое математическое выражение в простой текст, используя только буквы, цифры, пробелы и знаки препинания. Вот правила, которые нужно соблюдать:
-
-#     1. Убери все специальные символы :
-#         Замени символы $, ^, \sum, \infty, \frac и другие на слова или фразы.
-#         Например, "\sum" замени на "сумма", "^n" замени на "в степени n", "\infty" замени на "до бесконечности".
-#     2. Опиши формулу словами :
-#         Объясни каждый элемент формулы так, будто ты рассказываешь это человеку.
-#         Например, "f(x)" можно описать как "функция f от x".
-#     3.Избегай сложных конструкций :
-#         Используй только простые предложения, разделённые точками, запятыми или союзами.
-#     Пример стиля :
-#     Вход: f(x) = \sum_n=0^\infty \\fracf^(n)(a)n!(x - a)^n
-#     Выход: Функция f от x равна сумме бесконечного ряда Каждый член ряда равен n-й производной функции f в точке a делённой на факториал числа n и умноженной на выражение x минус a в степени n Сумма берётся по всем значениям n начиная с нуля
-#     Пример для практики :
-#     Вход: e^x = \sum_n=0^\infty \\fracx^nn!
-#     Выход: Экспонента от x равна сумме бесконечного ряда Каждый член ряда равен x в степени n делённому на факториал числа n Сумма берётся по всем значениям n начиная с нуля
-#     Твоя задача :
-#     Получить математическую формулу в виде текста.
-#     Преобразовать её в простой текст, который можно легко зачитать или озвучить.
-#     Убедиться, что в тексте нет специальных символов, только буквы, цифры, пробелы и знаки препинания. 
+    1. Убери все специальные символы :
+        Замени символы $, ^, \sum, \infty, \frac и другие на слова или фразы.
+        Например, "\sum" замени на "сумма", "^n" замени на "в степени n", "\infty" замени на "до бесконечности".
+    2. Опиши формулу словами :
+        Объясни каждый элемент формулы так, будто ты рассказываешь это человеку.
+        Например, "f(x)" можно описать как "функция f от x".
+    3.Избегай сложных конструкций :
+        Используй только простые предложения, разделённые точками, запятыми или союзами.
+    Пример стиля :
+    Вход: f(x) = \sum_n=0^\infty \\fracf^(n)(a)n!(x - a)^n
+    Выход: Функция f от x равна сумме бесконечного ряда Каждый член ряда равен n-й производной функции f в точке a делённой на факториал числа n и умноженной на выражение x минус a в степени n Сумма берётся по всем значениям n начиная с нуля
+    Пример для практики :
+    Вход: e^x = \sum_n=0^\infty \\fracx^nn!
+    Выход: Экспонента от x равна сумме бесконечного ряда Каждый член ряда равен x в степени n делённому на факториал числа n Сумма берётся по всем значениям n начиная с нуля
+    Твоя задача :
+    Получить математическую формулу в виде текста.
+    Преобразовать её в простой текст, который можно легко зачитать или озвучить.
+    Убедиться, что в тексте нет специальных символов, только буквы, цифры, пробелы и знаки препинания. 
                       
-#     Выведи полностью следующе сообщение с заменнеными формулами и ничего больше, НИЧЕГО:
-#     {message}"""
-#     prompt = PromptTemplate(input_variables=['message'], template = prompt_templ)
-#     messages = prompt.format(
-#         message=text
-#     )
-#     response = model.invoke(messages).content
-#     return response.split('</think>')[-1]
+    Выведи полностью следующе сообщение с заменнеными формулами и ничего больше, НИЧЕГО:
+    {message}"""
+    prompt = PromptTemplate(input_variables=['message'], template = prompt_templ)
+    messages = prompt.format(
+        message=text
+    )
+    response = model.invoke(messages).content
+    return response.split('</think>')[-1]
 
 
 # #обработка текста, чтобы были разные цвета у размышлений и ответа
@@ -86,11 +99,12 @@ def generate_chat_name():
 #         processed_text += '</span>'
 #     return processed_text
 
-# #заменяем скобки для латеха
-# def render_text_with_latex(text):
-#     for symb in ['\[', '\]', '\(', '\)']:
-#         text = text.replace(symb, '$')
-#     return text
+
+#заменяем скобки для латеха
+def render_text_with_latex(text):
+    for symb in ['\[', '\]', '\(', '\)']:
+        text = text.replace(symb, '$')
+    return text
 
 #делаем пословный вывод
 def write_with_delay(text):
@@ -102,7 +116,6 @@ def write_with_delay(text):
 
 # #фулл ответ модельки
 # def model_answer(model, prompt):
-    
 #     current_chat_history = st.session_state.chats[st.session_state.current_chat]
 #     with st.chat_message("user"):
 #         st.write(prompt)

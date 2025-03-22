@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_groq import ChatGroq
 
-MODEL_NAME = "llama3-70b-8192"
+MODEL_NAME = "llama-3.2-90b-vision-preview"
 llm = ChatGroq (
     model=MODEL_NAME, 
     api_key=st.secrets["GROQ_API_KEY"],

@@ -1,3 +1,8 @@
+from audio_recorder_streamlit import audio_recorder
+from streamlit_float import *
+from sound import *
+import streamlit as st
+import langsmith
 import langsmith
 import langsmith
 import streamlit as st
@@ -6,6 +11,7 @@ from agents import AgentAnswerPipeline
 from streamlit_cookies_controller import CookieController
 import torch
 import os
+from llm import llm
 
 ### INITIALIZATIONS BEGIN ###
 torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
@@ -40,7 +46,7 @@ if "user_id" not in cookies:
 else:
     USER_ID = cookies["user_id"]
 
-st.write(f"Your unique identifier: {USER_ID}")
+st.write(f'<span style="color: gray; opacity: 0.5;">Yor unique identifier is "{USER_ID}"</span>', unsafe_allow_html=True)
 CHAT_HISTORY_FILE = os.path.join(os.getcwd(), f"chats/chat_history_{USER_ID}.json")
 
 if "chats" not in st.session_state:
@@ -52,6 +58,16 @@ else:
     agent.init_chat_history(chat_history)
 
 ### INITIALIZATION END ###
+if not st.session_state.current_chat:
+    new_chat_name = ''
+    flag = True
+    while flag or new_chat_name in st.session_state.chats:
+        new_chat_name = generate_chat_name()
+        flag = False
+        
+    st.session_state.chats[new_chat_name] = []  # Initialize new chat history
+    st.session_state.current_chat = new_chat_name  # Switch to the new chat
+
 
 ### SIDEBAR BEGIN ###
 
@@ -68,35 +84,32 @@ if st.sidebar.button("Create New Chat"):
     st.session_state.chats[new_chat_name] = []  # Initialize new chat history
     st.session_state.current_chat = new_chat_name  # Switch to the new chat
 
-# Add a divider between sections
-st.sidebar.markdown("---")
-
-# List of Existing Chats
-st.sidebar.subheader("Your Chats")
-for chat_name in st.session_state.chats.keys():
-    if st.sidebar.button(chat_name, key=f"chat_button_{chat_name}"):
-        st.session_state.current_chat = chat_name  # Switch to the selected chat
-
-# Add another divider before delete button
-st.sidebar.markdown("---")
 
 # Delete Current Chat
-if st.sidebar.button("Delete Current Chat"):
+if st.sidebar.button("Delete Current Chat", type="primary"):
     if st.session_state.current_chat:
         del st.session_state.chats[st.session_state.current_chat]
         st.session_state.current_chat = None
         save_chats(CHAT_HISTORY_FILE)
         st.rerun()
 
+# Add a divider between sections
+st.sidebar.markdown("---")
+
+# List of Existing Chats
+st.sidebar.subheader("Your Chats")
+for chat_name in st.session_state.chats.keys():
+    if "Chat #" not in chat_name:
+        if st.sidebar.button(chat_name, key=f"chat_button_{chat_name}"):
+            st.session_state.current_chat = chat_name  # Switch to the selected chat
+
 ### SIDEBAR END ###
 
 ### MAIN CHAT INTERFACE BEGIN ###
 
-st.title("AI Chat App")
+st.title("Cal-AI Chat")
 
 if st.session_state.current_chat:
-    st.subheader(f"Chat: {st.session_state.current_chat}")
-
     # Display chat history
     for message in st.session_state.chats[st.session_state.current_chat]:
         message = message.model_dump()
@@ -117,4 +130,13 @@ if st.session_state.current_chat:
         
         # Chat saving
         st.session_state.chats[st.session_state.current_chat] = agent.get_chat()
+        if len(st.session_state.chats[st.session_state.current_chat])==2:
+            context = "[User: " + prompt + "\nAssistant" + ans + "]"
+            new_name = generate_chat_name(context, llm)
+            st.session_state.chats[new_name] = st.session_state.chats[st.session_state.current_chat]
+            del st.session_state.chats[st.session_state.current_chat]
+            st.session_state.current_chat = new_name
+            if st.sidebar.button(new_name, key=f"chat_button_{new_name}"):
+                pass
+
         save_chats(CHAT_HISTORY_FILE)
