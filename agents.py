@@ -20,7 +20,7 @@ class AgentAnswerPipeline():
     )
 
     def proccess_output(output):
-        return output.split("My answer: ")[-1]
+        return output.split("My answer:")[-1]
 
     # Create translation chain
     translate = translation_prompt | llm | StrOutputParser() | proccess_output
@@ -39,7 +39,7 @@ class AgentAnswerPipeline():
         agent=agent, tools=tools, handle_parsing_errors=True,
     )
 
-    first_system_prompt = SystemMessage(content="You are helpful calculus assistant. Use latex format for all your formulas. **Final answer should be the same language as the user's input**.")
+    first_system_prompt = SystemMessage(content="You are helpful calculus assistant. **Use latex format for all your formulas.**")
 
     def __init__(self, debug=True):
         """set debug=True if you want to show agent's thoughts in console output"""

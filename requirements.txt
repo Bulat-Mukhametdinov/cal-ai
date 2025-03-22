@@ -6,3 +6,7 @@ pinecone
 streamlit_cookies_controller
 wolframalpha
 langchain_community
+audio_recorder_streamlit
+streamlit_float
+SpeechRecognition
+pyttsx3

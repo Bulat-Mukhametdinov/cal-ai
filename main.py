@@ -1,11 +1,14 @@
-import langsmith
-import langsmith
+from audio_recorder_streamlit import audio_recorder
+from streamlit_float import *
+from sound import *
 import streamlit as st
+import langsmith
 from utils import *
 from agents import AgentAnswerPipeline
 from streamlit_cookies_controller import CookieController
 import torch
 import os
+from llm import llm
 
 ### INITIALIZATIONS BEGIN ###
 torch.classes.__path__ = [] # dirty fix - add this line to manually set it to empty.
@@ -90,12 +93,29 @@ if st.sidebar.button("Delete Current Chat"):
 
 ### SIDEBAR END ###
 
+
 ### MAIN CHAT INTERFACE BEGIN ###
 
 st.title("AI Chat App")
 
 if st.session_state.current_chat:
+    st.session_state.voice_len = 0
     st.subheader(f"Chat: {st.session_state.current_chat}")
+
+    #microphone button
+    float_init()
+    footer_container = st.container()
+
+    with footer_container:
+        col1, col2 = st.columns([4, 1])
+        with col2:
+            from audio_recorder_streamlit import audio_recorder
+            audio_bytes = audio_recorder(text="", icon_size="2x", key="recorder")
+            print(f"Audio bytes {len(audio_bytes) if audio_bytes else None}")
+
+    footer_container.float(
+        "position: fixed; bottom: 85%; left: 85%; transform: translateX(-50%); width: 50%; display: flex; align-items: center; justify-content: space-between;"
+    )
 
     # Display chat history
     for message in st.session_state.chats[st.session_state.current_chat]:
@@ -103,18 +123,47 @@ if st.session_state.current_chat:
         with st.chat_message(message["type"]):
             st.write(message['content'])
 
+
+    # Check if text input is provided
     if prompt := st.chat_input("What is up"):
-        # Showing up user's entered messge
+        # Showing up user's entered message
         with st.chat_message("user"):
             st.write(prompt)
-        
+
         # Answer for user
         ans = agent(prompt)
-        
+
         # Showing up llm's answer
         with st.chat_message('assistant'):
-            st.write(ans)
-        
+            st.write(render_text_with_latex(ans))
+            # No audio playback for text input
+
         # Chat saving
         st.session_state.chats[st.session_state.current_chat] = agent.get_chat()
         save_chats(CHAT_HISTORY_FILE)
+
+    # Check if audio input is provided
+    if audio_bytes:
+        audio_location = "audio_file.wav"
+        with open(audio_location, "wb") as f:
+            f.write(audio_bytes)
+            audio_bytes = None
+        voice_prompt = recognize_speech("audio_file.wav")  # You need to implement this function
+        if voice_prompt:
+            # Showing up user's entered message
+            with st.chat_message("user"):
+                st.write(voice_prompt)
+
+            # Answer for user
+            ans = agent(voice_prompt)
+
+            # Showing up llm's answer
+            with st.chat_message('assistant'):
+                st.write(render_text_with_latex(ans))
+                audio_file = "output.mp3"
+                tts_to_file(replace_formulas(llm, ans), audio_file)  # Озвучка только ответа
+                auto_play_audio(audio_file)  # Автовоспроизведение аудио
+
+            # Chat saving
+            st.session_state.chats[st.session_state.current_chat] = agent.get_chat()
+            save_chats(CHAT_HISTORY_FILE)
