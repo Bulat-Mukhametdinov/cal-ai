@@ -108,6 +108,24 @@ for chat_name in st.session_state.chats.keys():
 st.title("Cal-AI Chat")
 
 if st.session_state.current_chat:
+    # microphone button
+    float_init()
+    footer_container = st.container()
+
+    # Инициализация old_bytes через st.session_state, если еще не инициализирован
+    if "old_bytes" not in st.session_state:
+        st.session_state.old_bytes = None
+
+    with footer_container:
+        col1, col2 = st.columns([4, 1])
+        with col2:
+            audio_bytes = audio_recorder(text="", icon_size="2x", key="recorder")
+
+    footer_container.float(
+        "position: fixed; bottom: 15%; left: 80%; transform: translateX(-50%); width: 50%; display: flex; align-items: center; justify-content: space-between;"
+    )
+
+
     # Display chat history
     for message in st.session_state.chats[st.session_state.current_chat]:
         message = message.model_dump()
@@ -138,3 +156,46 @@ if st.session_state.current_chat:
                 pass
 
         save_chats(CHAT_HISTORY_FILE)
+    
+    # Проверка, изменились ли аудио данные
+    if audio_bytes != st.session_state.old_bytes:
+        # Save and process the audio file
+        print(st.session_state.old_bytes)  # Для отладки
+        audio_location = "audio_file.wav"
+        st.session_state.old_bytes = audio_bytes  # Обновляем old_bytes
+        with open(audio_location, "wb") as f:
+            f.write(audio_bytes)
+
+        # Recognize speech from the audio file
+        voice_prompt = recognize_speech("audio_file.wav", language="en-EN")  # You need to implement this function
+
+        if voice_prompt:
+            # Showing up user's entered message
+            with st.chat_message("user"):
+                st.write(voice_prompt)
+
+            # Answer for user
+            ans = agent(voice_prompt)
+
+            # Showing up llm's answer
+            with st.chat_message('assistant'):
+                st.write(ans)
+                audio_file = "output.mp3"
+                tts_to_file(replace_formulas(llm, ans), audio_file)  # Озвучка только ответа
+                auto_play_audio(audio_file)  # Автовоспроизведение аудио
+
+            # Chat saving
+            st.session_state.chats[st.session_state.current_chat] = agent.get_chat()
+            if len(st.session_state.chats[st.session_state.current_chat])==2:
+                context = "[User: " + voice_prompt + "\nAssistant" + ans + "]"
+                new_name = generate_chat_name(context, llm)
+                st.session_state.chats[new_name] = st.session_state.chats[st.session_state.current_chat]
+                del st.session_state.chats[st.session_state.current_chat]
+                st.session_state.current_chat = new_name
+                if st.sidebar.button(new_name, key=f"chat_button_{new_name}"):
+                    pass
+
+
+        # Clear the audio_bytes after processing
+        st.session_state["audio_bytes"] = None
+        audio_bytes = None

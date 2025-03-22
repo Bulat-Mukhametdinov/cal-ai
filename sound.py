@@ -11,29 +11,17 @@ def auto_play_audio(audio_file):
     audio_html = f'<audio src="data:audio/mp3;base64,{base64_audio}" controls autoplay>'
     st.markdown(audio_html, unsafe_allow_html=True)
 
-def tts_to_file(text, file_path="output.mp3"):  # Преобразование текста в аудио и сохранение в файл
-    # Инициализация движка TTS
+def tts_to_file(text, file_path="output.mp3"):
     engine = pyttsx3.init()
-    language = 'ru'
-
-    # Получение списка доступных голосов
     voices = engine.getProperty('voices')
 
-    # Поиск английского голоса
-    selected_voice = None
+    # Выбор русского голоса
     for voice in voices:
-        if language in voice.id.lower():  # Проверка, содержит ли ID голоса 'en' (английский)
-            selected_voice = voice.id
+        if "russian" in voice.name.lower():
+            engine.setProperty('voice', voice.id)
             break
 
-    if selected_voice is None:
-        raise ValueError("Английский голос не найден в системе. Убедитесь, что он установлен.")
-
-    # Установка выбранного голоса и скорости речи
-    engine.setProperty('voice', selected_voice)
     engine.setProperty('rate', 150)  # Скорость речи
-
-    # Сохранение аудио в файл
     engine.save_to_file(text, file_path)
     engine.runAndWait()
 
@@ -53,11 +41,11 @@ def recognize_speech(wav_file_path, language="ru-RU"):
             audio = recognizer.record(source)
 
         # Используем Google Speech Recognition для распознавания речи
-        text = recognizer.recognize_google(audio, language=language)
+        text = recognizer.recognize_google(audio, language="ru-RU")
         return text
 
     except sr.UnknownValueError:
-        print("Не удалось распознать речь.")
+        st.write(f'<span style="color: red; opacity: 0.5;">Speech recognition failed</span>', unsafe_allow_html=True)
         return None
     except sr.RequestError as e:
         print(f"Ошибка сервиса распознавания речи: {e}")
