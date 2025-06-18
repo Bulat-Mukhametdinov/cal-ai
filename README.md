@@ -2,6 +2,13 @@
 
 This project is a Calculus AI chatbot built on Python and LangChain with Streamlit frontend. The chatbot is designed to assist users with calculus-related queries, theorem provings, providing explanations, solutions, and guidance.
 
+---
+<h3 align="center">
+    🎈 Try it out here: <a href="https://calculus-ai-final.streamlit.app/">cal-ai on streamlit 🎈 </a>
+</h3>
+
+---
+
 ## Project Setup
 
 ### Prerequisites
