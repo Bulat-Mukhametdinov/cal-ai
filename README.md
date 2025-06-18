@@ -9,6 +9,9 @@ This project is a Calculus AI chatbot built on Python and LangChain with Streaml
 
 ---
 
+![image](https://github.com/user-attachments/assets/7cec322b-5dfb-48cf-8689-258970ecbfac)
+
+
 ## Project Setup
 
 ### Prerequisites
