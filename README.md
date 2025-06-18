@@ -55,6 +55,13 @@ Make sure you have the following installed:
    pip install -r requirements.txt
    ```
 
+### Running the App
+
+```bash
+streamlit run main.py
+```
+
+The app will be available at http://localhost:8501 in your web browser.
 
 ## Helpful Links
 - [groq available models](https://console.groq.com/docs/rate-limits)
